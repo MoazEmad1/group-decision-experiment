@@ -102,6 +102,7 @@ the backend service (using /api/health) and make the frontend wait until the
 backend is healthy, so a reviewer never sees a 502 on first start. Keep it
 minimal and tell me how to verify.
 
+
 ## Prompt 5 — 2026-11-12, 15:26
 Step 2 verified and committed (including the backend healthcheck). Proceed
 with step 3 only: logic.py with the pure tally (latest vote per voter per
@@ -109,3 +110,15 @@ round), abstentions, the tie-break chain (round 2, then combined, then seeded
 random) and the phase transition table, plus test_logic covering a clear
 winner, a tie resolved by combined votes, a full tie resolved by the seed,
 abstentions, and a changed vote. When done, tell me how to verify it, and stop.
+
+
+## Prompt 6 — 2026-11-12, 15:34
+Step 3 verified and committed. Confirmed: keep the combined count limited to
+the round-2 leaders; the final round carries the decision and round 1 only
+breaks ties among the finalists.
+
+Proceed with step 4 only: DB models (sessions with config snapshot and seed,
+participants, messages, append-only votes, phase_events) and POST /join with
+slot assignment, per-session label shuffle, AI participants created when the
+session is created, and a global lock so a 4th human starts a new session.
+When done, tell me how to verify it, and stop.

@@ -25,6 +25,9 @@ class Phase(str, Enum):
     ROUND_2_CHAT = "ROUND_2_CHAT"
     ROUND_2_VOTE = "ROUND_2_VOTE"
     RESULTS = "RESULTS"
+    # Not part of the flow: set on startup for sessions a server restart interrupted
+    # (live state is in memory, so they cannot resume). Terminal, like RESULTS.
+    ABORTED = "ABORTED"
 
 
 NEXT_PHASE: dict[Phase, Phase] = {
