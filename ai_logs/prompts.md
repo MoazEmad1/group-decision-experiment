@@ -198,3 +198,25 @@ the configured llm_model.
   .env.example with an empty value.
 Add tests using a fake LLM client (no real API calls in tests). When done,
 tell me how to verify it with and without a key, and stop.
+
+
+## Prompt 12 — 2026-11-12, 17:17
+Step 9 verified (including a live test with a key) and committed. Proceed
+with step 10: the README.
+Concise sections:
+- What it is (two sentences).
+- How to run: docker compose up --build, the URL, and testing several
+  participants with private windows or tabs.
+- Switching conditions via CONFIG_PATH, including the LLM preset and
+  ANTHROPIC_API_KEY in .env (optional; without a key the AIs use the
+  rule-based agent).
+- Running the tests.
+- Architecture in a few lines.
+- Design decisions and trade-offs, using docs/ISSUES.md as the source,
+  including the ethics note on AI identity questions and the observed
+  limitation that both AIs deflected identically.
+- Known limitations and next steps: export endpoint, self-nomination setting,
+  token in the query string, no migrations, in-memory session state.
+- Time spent: leave a placeholder line I will fill in myself.
+- A link to the ai_logs folder.
+Plain, factual tone, no badges or emojis. When done, stop.
