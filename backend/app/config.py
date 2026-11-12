@@ -35,6 +35,8 @@ class TimingConfig(_Strict):
 class AIConfig(_Strict):
     mode: Literal["rule_based", "llm"] = "rule_based"
     llm_model: str = Field(default="claude-haiku-5-5", min_length=1)
+    # Per LLM call; on timeout that message falls back to the rule-based brain.
+    llm_timeout_seconds: float = Field(default=8, gt=0)
     reply_delay_min_seconds: float = Field(default=2, ge=0)
     reply_delay_max_seconds: float = Field(default=6, ge=0)
     # Each AI "joins" the waiting room after a random delay in this range, so a lone human

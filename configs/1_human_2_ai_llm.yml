@@ -1,0 +1,22 @@
+# Condition 3 with LLM-written AI messages (needs ANTHROPIC_API_KEY; without it, rule-based fallback).
+condition: 1_human_2_ai_llm
+
+participants:
+  - type: human
+  - type: ai
+  - type: ai
+
+timing:
+  chat_seconds: 60
+  vote_seconds: 15
+
+ai:
+  mode: llm                 # rule_based | llm (llm needs ANTHROPIC_API_KEY)
+  llm_model: claude-haiku-5-5
+  reply_delay_min_seconds: 2
+  reply_delay_max_seconds: 6
+  join_delay_min_seconds: 3
+  join_delay_max_seconds: 10
+  max_messages_per_round: 3     # per AI per round; stops two AIs looping on each other
+  typing_seconds_per_char: 0.06 # simulated typing time, so longer messages take longer
+  llm_timeout_seconds: 8        # llm mode: per call; on timeout that message uses the rule-based fallback

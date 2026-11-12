@@ -18,6 +18,8 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-experiment}:${POSTGRES_PASSWORD:-experiment}@db:5432/${POSTGRES_DB:-experiment}
       CONFIG_PATH: ${CONFIG_PATH:-config.yml}
+      # Only read when ai.mode is llm. Comes from your shell or .env; never commit it.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     volumes:
       - ./config.yml:/app/config.yml:ro
       - ./configs:/app/configs:ro

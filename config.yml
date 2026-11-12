@@ -22,3 +22,4 @@ ai:
   join_delay_max_seconds: 10
   max_messages_per_round: 3     # per AI per round; stops two AIs looping on each other
   typing_seconds_per_char: 0.06 # simulated typing time, so longer messages take longer
+  llm_timeout_seconds: 8        # llm mode: per call; on timeout that message uses the rule-based fallback

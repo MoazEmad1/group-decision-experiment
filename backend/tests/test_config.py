@@ -56,6 +56,15 @@ def test_root_config_matches_1_human_2_ai_preset():
     assert load_config(repo_file("config.yml")) == load_config(repo_file("configs/1_human_2_ai.yml"))
 
 
+def test_llm_preset_differs_from_1_human_2_ai_only_in_mode_and_condition():
+    llm = load_config(repo_file("configs/1_human_2_ai_llm.yml"))
+    base = load_config(repo_file("configs/1_human_2_ai.yml"))
+    assert llm.ai.mode == "llm"
+    assert llm.ai.llm_model == "claude-haiku-5-5"
+    assert llm.model_copy(update={"condition": base.condition, "ai": base.ai}) == base
+    assert llm.ai.model_copy(update={"mode": "rule_based"}) == base.ai
+
+
 # --- path resolution -------------------------------------------------------
 
 
@@ -94,6 +103,7 @@ def test_defaults_applied_when_sections_omitted(tmp_path):
     assert config.ai.mode == "rule_based"
     assert config.ai.reply_delay_min_seconds <= config.ai.reply_delay_max_seconds
     assert (config.ai.join_delay_min_seconds, config.ai.join_delay_max_seconds) == (3, 10)
+    assert config.ai.llm_timeout_seconds == 8
 
 
 def test_snapshot_round_trips():

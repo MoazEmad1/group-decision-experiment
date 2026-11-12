@@ -180,3 +180,21 @@ Design the agent behind a small interface so step 9 can add the LLM mode
 without changing the session manager. Add tests for the reply cap, vote
 consistency and vote timing. When done, tell me how to verify it with the
 1_human_2_ai condition, and stop.
+
+
+## Prompt 11 — 2026-11-12, 16:53
+Step 8 verified and committed. No config field for self-nomination; keep the
+current behaviour and I'll note it in the README.
+
+Proceed with step 9: LLM mode for the AI agents via ANTHROPIC_API_KEY, using
+the configured llm_model.
+- Same interface, delays, reply cap and vote timing as the rule-based agent.
+- The system prompt must keep the blind condition: casual and short, never
+  mention being an AI or a model, stay on the task of choosing a Decision
+  Maker.
+- If the key is missing or a call fails or times out, fall back to the
+  rule-based agent for that message, and log it server-side.
+- The key only comes from the environment; add ANTHROPIC_API_KEY to
+  .env.example with an empty value.
+Add tests using a fake LLM client (no real API calls in tests). When done,
+tell me how to verify it with and without a key, and stop.

@@ -30,4 +30,9 @@
    does nothing, so a session can never advance twice. 
 4. **One participant per tab.** The token is kept in sessionStorage, so each
    browser tab is a separate participant (easy to test 3 humans on one
-   machine) and a reload rejoins as the same player.
+   machine) and a reload rejoins as the same player. 
+5. **Known limitation (observed in a live test)**: when asked "are you a bot?",
+   both AIs deflected in the same way at the same time, which can itself be a
+   cue. Possible next steps: let at most one AI respond to identity questions,
+   vary the deflection style, or settle the policy with the study's ethics
+   plan.

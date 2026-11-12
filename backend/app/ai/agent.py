@@ -13,17 +13,22 @@ human participants.
 """
 
 import asyncio
+import logging
 import random
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
 from datetime import datetime
 from typing import Protocol
 
 from app.ai.base import Brain, Context, mentioned_labels
+from app.ai.llm import AnthropicLLMClient, LLMBrain, LLMClient
 from app.ai.rule_based import RuleBasedBrain
 from app.config import AIConfig, ExperimentConfig
 from app.logic import Phase, RoundTally, is_chat, is_vote, round_of
 from app.models import utcnow
+
+log = logging.getLogger("uvicorn.error")
 
 
 class SessionView(Protocol):
@@ -143,12 +148,15 @@ class AIAgent:
         if not self._still_chatting(round):
             return
         ctx = self._context(round)
+        composing_started = time.monotonic()
         reply = await (self._brain.open_round(ctx) if trigger is None else self._brain.respond(ctx, trigger))
         if reply is None or reply.candidate not in ctx.players:
             return
 
         s = self._settings
         typing = len(reply.text) * s.typing_seconds_per_char * self._rng.uniform(0.7, 1.3)
+        # Time the brain took (an LLM call) counts as typing time, so pacing doesn't double up.
+        typing = max(0.0, typing - (time.monotonic() - composing_started))
         if typing + s.deadline_margin_seconds > self._remaining():
             return  # would arrive at or after the deadline
         await asyncio.sleep(typing)
@@ -199,18 +207,30 @@ class AIAgent:
         )
 
 
-# --- factory: the only place that knows which brain to use (step 9 adds "llm") -----
+# --- factory: the only place that knows which brain to use -------------------------
 
 
 AgentFactory = Callable[..., AIAgent]
 
 
-def make_brain(config: ExperimentConfig, rng: random.Random) -> Brain:
-    return RuleBasedBrain(rng)
+def make_brain(config: ExperimentConfig, rng: random.Random, llm_client: LLMClient | None) -> Brain:
+    rule_based = RuleBasedBrain(rng)
+    if config.ai.mode == "llm":
+        return LLMBrain(llm_client, fallback=rule_based)  # llm_client None = no key: always falls back
+    return rule_based
 
 
-def make_agent_factory(config: ExperimentConfig, **setting_overrides) -> AgentFactory:
+def make_agent_factory(
+    config: ExperimentConfig, *, llm_client: LLMClient | None = None, **setting_overrides
+) -> AgentFactory:
+    """llm_client: injected in tests; by default built from ANTHROPIC_API_KEY when ai.mode is llm."""
     settings = AgentSettings.from_config(config.ai, **setting_overrides)
+    if config.ai.mode == "llm" and llm_client is None:
+        llm_client = AnthropicLLMClient.from_env(config.ai)
+        if llm_client is None:
+            log.warning("ai.mode is llm but ANTHROPIC_API_KEY is not set: AI messages use the rule-based fallback")
+        else:
+            log.info("AI agents use LLM mode with model %s", config.ai.llm_model)  # never log the key
 
     def factory(*, label: str, seed: int, view: SessionView, actions: AgentActions, spawn: Spawn) -> AIAgent:
         # Seeded from the session seed + label: an agent's choices are reproducible given the same chat.
@@ -218,7 +238,7 @@ def make_agent_factory(config: ExperimentConfig, **setting_overrides) -> AgentFa
         return AIAgent(
             label=label,
             view=view,
-            brain=make_brain(config, rng),
+            brain=make_brain(config, rng, llm_client),
             settings=settings,
             actions=actions,
             spawn=spawn,
