@@ -135,7 +135,7 @@ on connect and reconnect, and chat broadcast and storage. When done, tell me
 how to verify it, and stop.
 
 
-## Prompt 7 — 2026-11-12, 15:59
+## Prompt 8 — 2026-11-12, 15:59
 Step 5 verified and committed. Proceed with step 6 only: phase timers with
 the generation counter, voting with append-only storage and early end when
 all 3 have voted, round-1 tally at the start of round 2, results with the
@@ -146,7 +146,7 @@ starlette's TestClient via filterwarnings in pytest.ini, scoped to that message.
 When done, tell me how to verify it, and stop.
 
 
-## Prompt 8 — 2026-11-12, 16:15
+## Prompt 9 — 2026-11-12, 16:15
 Step 6 verified and committed. Proceed with step 7 only: the React screens.
 Keep it simple, plain CSS, no UI framework.
 - Join screen: a "Join" button that calls POST /api/join, stores the token in
@@ -163,3 +163,20 @@ Keep it simple, plain CSS, no UI framework.
   (opened in another tab: show a short message).
 Nothing in the UI may reveal participant types. When done, tell me how to
 verify it with private browser windows, and stop.
+
+
+## Prompt 10 — 2026-11-12, 16:30
+Step 7 verified in the browser and committed.
+
+Proceed with step 8 only: the rule-based AI agents.
+- Chat: short, casual messages that react to what was said and argue for one
+  candidate; human-like delays (longer for longer messages); never open a
+  round instantly; don't reply to every message; cap messages per round so
+  two AIs never loop on each other.
+- Votes: cast at a random time within the vote window, consistent with the
+  candidate the AI argued for.
+- All AI messages and votes go through the same paths as human ones.
+Design the agent behind a small interface so step 9 can add the LLM mode
+without changing the session manager. Add tests for the reply cap, vote
+consistency and vote timing. When done, tell me how to verify it with the
+1_human_2_ai condition, and stop.

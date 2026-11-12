@@ -22,6 +22,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app import logic, models, ws_schema
+from app.ai import AgentFactory, AIAgent, make_agent_factory
 from app.config import ExperimentConfig
 from app.lobby import JoinResult
 from app.logic import Phase, RoundTally, decide, everyone_voted, is_chat, is_vote, latest_votes, next_phase
@@ -65,6 +66,7 @@ class LiveSession:
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     generation: int = 0
     timer: asyncio.Task | None = None
+    agents: dict[uuid.UUID, AIAgent] = field(default_factory=dict)  # by participant id
 
     @property
     def labels(self) -> list[str]:
@@ -75,7 +77,12 @@ class LiveSession:
 
 
 class SessionManager:
-    def __init__(self, config: ExperimentConfig, sessionmaker: async_sessionmaker[AsyncSession]):
+    def __init__(
+        self,
+        config: ExperimentConfig,
+        sessionmaker: async_sessionmaker[AsyncSession],
+        agent_factory: AgentFactory | None = None,
+    ):
         self.config = config
         self._db = sessionmaker
         self._sessions: dict[uuid.UUID, LiveSession] = {}
@@ -83,6 +90,7 @@ class SessionManager:
         self._load_lock = asyncio.Lock()
         self._tasks: set[asyncio.Task] = set()
         self._rng = random.Random()
+        self._agent_factory = agent_factory or make_agent_factory(config)
 
     def get(self, session_id: uuid.UUID) -> LiveSession | None:
         return self._sessions.get(session_id)
@@ -115,6 +123,7 @@ class SessionManager:
     async def on_join(self, result: JoinResult) -> None:
         session, created = await self._load(result.session_id)
         if created:
+            self._create_agents(session)
             await self._schedule_ai_joins(session)
         async with session.lock:
             await self._maybe_start(session)
@@ -145,6 +154,17 @@ class SessionManager:
                 if p.token:
                     self._by_token[p.token] = (session, live)
             return session, created
+
+    def _create_agents(self, session: LiveSession) -> None:
+        for participant in session.participants.values():
+            if participant.kind == "ai":
+                session.agents[participant.id] = self._agent_factory(
+                    label=participant.label,
+                    seed=session.seed,
+                    view=session,
+                    actions=_AgentActions(self, session, participant),
+                    spawn=self._spawn,
+                )
 
     async def _schedule_ai_joins(self, session: LiveSession) -> None:
         ai = self.config.ai
@@ -236,6 +256,9 @@ class SessionManager:
             session.timer = self._spawn(
                 f"timer {session.id} {phase.value}", self._timer, session, session.generation, duration
             )
+        # Last, after every await: agents only schedule their own tasks here.
+        for agent in session.agents.values():
+            agent.on_phase()
 
     # --- chat and votes ----------------------------------------------------------
 
@@ -258,6 +281,8 @@ class SessionManager:
             entry = ws_schema.chat_entry(message_id, sender.label, rnd, text, now)
             session.messages.append(entry)
             await self._broadcast(session, ws_schema.chat_message(entry))
+            for agent in session.agents.values():
+                agent.on_message(entry)  # agents can't tell human from AI messages either
             return None
 
     async def cast_vote(self, session: LiveSession, voter: LiveParticipant, target_label: str) -> str | None:
@@ -363,3 +388,16 @@ class SessionManager:
             await ws.close(code=code, reason=reason)
         except Exception:
             pass
+
+
+class _AgentActions:
+    """An AI's only way to act: the exact same post_chat / cast_vote paths humans use."""
+
+    def __init__(self, manager: SessionManager, session: LiveSession, participant: LiveParticipant):
+        self._manager, self._session, self._participant = manager, session, participant
+
+    async def say(self, text: str) -> bool:
+        return await self._manager.post_chat(self._session, self._participant, text) is None
+
+    async def vote(self, target: str) -> bool:
+        return await self._manager.cast_vote(self._session, self._participant, target) is None

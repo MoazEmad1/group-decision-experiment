@@ -41,6 +41,10 @@ class AIConfig(_Strict):
     # waits like they would for other humans (blind condition). 0/0 = join instantly.
     join_delay_min_seconds: float = Field(default=3, ge=0)
     join_delay_max_seconds: float = Field(default=10, ge=0)
+    # Hard cap per AI per round; also what stops two AIs from replying to each other forever.
+    max_messages_per_round: int = Field(default=3, ge=0)
+    # Simulated typing time (jittered), so longer messages take longer to appear.
+    typing_seconds_per_char: float = Field(default=0.06, ge=0)
 
     @model_validator(mode="after")
     def _delay_ranges(self):

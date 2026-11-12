@@ -27,4 +27,7 @@
    AI participants. 
 3. **Stale timers.** Each phase change increments a generation counter and
    cancels the previous timer; a timer that fires late for an old generation
-   does nothing, so a session can never advance twice.
+   does nothing, so a session can never advance twice. 
+4. **One participant per tab.** The token is kept in sessionStorage, so each
+   browser tab is a separate participant (easy to test 3 humans on one
+   machine) and a reload rejoins as the same player.

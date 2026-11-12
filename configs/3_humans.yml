@@ -17,3 +17,5 @@ ai:
   reply_delay_max_seconds: 6
   join_delay_min_seconds: 3
   join_delay_max_seconds: 10
+  max_messages_per_round: 3     # per AI per round; stops two AIs looping on each other
+  typing_seconds_per_char: 0.06 # simulated typing time, so longer messages take longer

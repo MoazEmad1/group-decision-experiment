@@ -1,80 +1,15 @@
 """Phase engine: timers, generation counter, voting, early vote end, results, AI join delay.
 Drives Lobby + SessionManager directly on a temp SQLite DB with tiny durations."""
 
-import asyncio
 import time
 
-import pytest
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-
 from app import models
-from app.db import init_db
-from app.lobby import Lobby
 from app.logic import Phase
-from app.session_manager import LiveSession, SessionManager
-from tests.helpers import NO_AI_JOIN_DELAY, preset
+from app.session_manager import LiveSession
+from tests.helpers import NO_AI_JOIN_DELAY, FakeWS, preset, wait_for
 
 FAST = {"chat_seconds": 0.05, "vote_seconds": 0.05}
 LONG = 30  # "never fires during this test"
-
-
-class FakeWS:
-    """Stands in for a participant's WebSocket; records every frame the server sends."""
-
-    def __init__(self):
-        self.frames: list[dict] = []
-
-    async def send_json(self, frame: dict) -> None:
-        self.frames.append(frame)
-
-    def types(self) -> list[str]:
-        return [f["type"] for f in self.frames]
-
-    def of_type(self, type_: str) -> list[dict]:
-        return [f["payload"] for f in self.frames if f["type"] == type_]
-
-
-@pytest.fixture
-async def env(tmp_path):
-    engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path / 'phases.db'}")
-    await init_db(engine)
-    sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
-    managers: list[SessionManager] = []
-
-    class Env:
-        db = sessionmaker
-
-        def setup(self, config):
-            self.lobby, self.manager = Lobby(config), SessionManager(config, sessionmaker)
-            managers.append(self.manager)
-            return self
-
-        async def join(self) -> LiveSession:
-            async with sessionmaker() as db:
-                result = await self.lobby.join(db)
-            await self.manager.on_join(result)
-            return self.manager.get(result.session_id)
-
-        async def rows(self, model, session: LiveSession, order_by=None):
-            async with sessionmaker() as db:
-                query = select(model).where(model.session_id == session.id)
-                if order_by is not None:
-                    query = query.order_by(order_by)
-                return (await db.scalars(query)).all()
-
-    yield Env()
-    for manager in managers:
-        await manager.close()
-    await engine.dispose()
-
-
-async def wait_for(predicate, timeout: float = 3.0) -> None:
-    deadline = time.monotonic() + timeout
-    while not predicate():
-        if time.monotonic() > deadline:
-            raise AssertionError("condition not reached in time")
-        await asyncio.sleep(0.005)
 
 
 async def start_3_humans(env, **timing) -> tuple[LiveSession, dict[str, FakeWS]]:

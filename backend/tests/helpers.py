@@ -1,3 +1,5 @@
+import asyncio
+import time
 from pathlib import Path
 
 from app.config import ExperimentConfig, load_config
@@ -18,3 +20,27 @@ def preset(name: str, *, timing: dict | None = None, ai: dict | None = None) -> 
     data["timing"].update(timing or {})
     data["ai"].update(ai or {})
     return ExperimentConfig.model_validate(data)
+
+
+class FakeWS:
+    """Stands in for a participant's WebSocket; records every frame the server sends."""
+
+    def __init__(self):
+        self.frames: list[dict] = []
+
+    async def send_json(self, frame: dict) -> None:
+        self.frames.append(frame)
+
+    def types(self) -> list[str]:
+        return [f["type"] for f in self.frames]
+
+    def of_type(self, type_: str) -> list[dict]:
+        return [f["payload"] for f in self.frames if f["type"] == type_]
+
+
+async def wait_for(predicate, timeout: float = 3.0) -> None:
+    deadline = time.monotonic() + timeout
+    while not predicate():
+        if time.monotonic() > deadline:
+            raise AssertionError("condition not reached in time")
+        await asyncio.sleep(0.005)
