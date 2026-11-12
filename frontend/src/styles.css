@@ -1,0 +1,313 @@
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1d2330;
+  --muted: #6b7280;
+  --border: #e2e5ea;
+  --accent: #2f5bd3;
+  --accent-soft: #e8eefc;
+  --mine: #eef6ee;
+  --danger: #b42318;
+  --warn-bg: #fff7e0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.topbar h1 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.you {
+  font-weight: 600;
+}
+
+.phase {
+  color: var(--muted);
+}
+
+.countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.countdown.urgent {
+  background: #fde8e6;
+  color: var(--danger);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card.center {
+  text-align: center;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.9rem;
+}
+
+.notice,
+.banner {
+  background: var(--warn-bg);
+  border: 1px solid #f1d58a;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.banner {
+  text-align: center;
+  margin: 0 0 16px;
+}
+
+.error {
+  color: var(--danger);
+  margin: 8px 0 0;
+}
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.task {
+  margin-top: 0;
+}
+
+.messages {
+  height: 50vh;
+  min-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafbfc;
+}
+
+.history .messages {
+  height: auto;
+  min-height: 0;
+  max-height: 40vh;
+}
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.msg.mine {
+  margin-left: auto;
+  background: var(--mine);
+}
+
+.msg-from {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.msg-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+.composer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.composer input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.vote-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.vote-option {
+  flex: 1 1 140px;
+  padding: 14px;
+  font-weight: 600;
+}
+
+.vote-option.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.tally {
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--card);
+  margin-bottom: 12px;
+}
+
+.tally ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tally li {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.tally-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.tally-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.tally-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+.tally p {
+  margin: 6px 0 0;
+}
+
+.results .winner {
+  font-size: 2rem;
+  margin: 4px 0 8px;
+}
+
+.tallies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin: 8px auto 16px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

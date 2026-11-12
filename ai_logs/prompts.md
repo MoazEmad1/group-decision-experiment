@@ -136,7 +136,6 @@ how to verify it, and stop.
 
 
 ## Prompt 7 — 2026-11-12, 15:59
-
 Step 5 verified and committed. Proceed with step 6 only: phase timers with
 the generation counter, voting with append-only storage and early end when
 all 3 have voted, round-1 tally at the start of round 2, results with the
@@ -145,3 +144,22 @@ Add tests for phase advancement with tiny durations and for early vote end.
 Also silence the third-party anyio BlockingPortal DeprecationWarning from
 starlette's TestClient via filterwarnings in pytest.ini, scoped to that message.
 When done, tell me how to verify it, and stop.
+
+
+## Prompt 8 — 2026-11-12, 16:15
+Step 6 verified and committed. Proceed with step 7 only: the React screens.
+Keep it simple, plain CSS, no UI framework.
+- Join screen: a "Join" button that calls POST /api/join, stores the token in
+  sessionStorage, and opens the WebSocket. On reload, reconnect with the
+  stored token.
+- Waiting room: "Waiting for other participants".
+- Chat: show "You are Player X", a countdown from the server deadline
+  (corrected with server_time), messages labelled Player A/B/C, a divider
+  before round 2, and the round-1 vote tally at the start of round 2.
+- Vote: three buttons, the current choice highlighted from vote_recorded,
+  and the countdown.
+- Results: the Decision Maker, both round tallies and the tie-break method.
+- Handle close codes 4401 (invalid token: clear it, back to join) and 4409
+  (opened in another tab: show a short message).
+Nothing in the UI may reveal participant types. When done, tell me how to
+verify it with private browser windows, and stop.
