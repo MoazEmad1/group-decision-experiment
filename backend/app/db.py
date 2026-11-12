@@ -1,8 +1,9 @@
 import os
 from collections.abc import AsyncIterator
 
+from fastapi import Request
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 from app.logic import Phase
 from app.models import Base, ExperimentSession, PhaseEvent, utcnow
@@ -12,12 +13,9 @@ DATABASE_URL = os.environ.get(
     "postgresql+asyncpg://experiment:experiment@localhost:5432/experiment",
 )
 
-engine = create_async_engine(DATABASE_URL)
-SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-
-async def get_db() -> AsyncIterator[AsyncSession]:
-    async with SessionLocal() as db:
+async def get_db(request: Request) -> AsyncIterator[AsyncSession]:
+    async with request.app.state.sessionmaker() as db:
         yield db
 
 

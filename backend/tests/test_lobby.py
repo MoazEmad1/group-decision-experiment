@@ -3,23 +3,16 @@ production uses the same models on Postgres (JSON column becomes JSONB)."""
 
 import asyncio
 from collections import Counter
-from pathlib import Path
 
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.config import ExperimentConfig, load_config
+from app.config import ExperimentConfig
 from app.db import abort_unfinished_sessions, init_db
 from app.lobby import LABELS, SEED_RANGE, Lobby
 from app.models import ExperimentSession, Participant, PhaseEvent
-
-CONFIGS = Path(__file__).resolve().parent.parent
-CONFIGS = next(p for p in (CONFIGS / "configs", CONFIGS.parent / "configs") if p.is_dir())
-
-
-def preset(name: str) -> ExperimentConfig:
-    return load_config(CONFIGS / f"{name}.yml")
+from tests.helpers import preset
 
 
 @pytest.fixture

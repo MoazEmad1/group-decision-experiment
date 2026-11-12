@@ -122,3 +122,13 @@ participants, messages, append-only votes, phase_events) and POST /join with
 slot assignment, per-session label shuffle, AI participants created when the
 session is created, and a global lock so a 4th human starts a new session.
 When done, tell me how to verify it, and stop.
+
+## Prompt 7 — 2026-11-12, 15:43
+Step 4 verified and committed, including the nginx DNS fix. Yes to the
+waiting-room fix: AIs should "join" after a random 3–10s delay so the waiting
+room behaves the same in every condition; implement it in step 6 or 8,
+whichever fits better.
+
+Proceed with step 5 only: WebSocket endpoint with token auth, state_snapshot
+on connect and reconnect, and chat broadcast and storage. When done, tell me
+how to verify it, and stop.
