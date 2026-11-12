@@ -17,16 +17,27 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-experiment}:${POSTGRES_PASSWORD:-experiment}@db:5432/${POSTGRES_DB:-experiment}
+      CONFIG_PATH: ${CONFIG_PATH:-config.yml}
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+      - ./configs:/app/configs:ro
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # python:slim has no curl; urlopen raises (exit 1) on connection error or non-2xx.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
     ports:
       - "8000:8000"
 
   frontend:
     build: ./frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "8080:80"
 

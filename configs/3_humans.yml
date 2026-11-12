@@ -1,0 +1,17 @@
+# Condition 1: 3 humans, no AI agents. The ai block is unused here.
+condition: 3_humans
+
+participants:
+  - type: human
+  - type: human
+  - type: human
+
+timing:
+  chat_seconds: 60
+  vote_seconds: 15
+
+ai:
+  mode: rule_based
+  llm_model: claude-haiku-5-5
+  reply_delay_min_seconds: 2
+  reply_delay_max_seconds: 6

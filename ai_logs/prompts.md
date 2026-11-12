@@ -86,3 +86,18 @@ Additional decisions:
 - No changes to ~/.claude/settings.json; skip the statusline badge.
 
 Start with step 1 only. When it's done, tell me exactly how to verify it, and stop.
+
+
+## Prompt 3 — 2026-11-12, 03:11
+Step 1 verified and committed. Proceed with step 2 only: config loader with
+pydantic validation, the three presets, root config.yml defaulting to
+1_human_2_ai, CONFIG_PATH override, and test_config. When done, tell me how
+to verify it, and stop.
+
+
+## Prompt 4 — 2026-11-12, 03:18
+Verification note: right after `docker compose up -d`, nginx returned 502
+for a few seconds because the backend wasn't ready yet. Add a healthcheck to
+the backend service (using /api/health) and make the frontend wait until the
+backend is healthy, so a reviewer never sees a 502 on first start. Keep it
+minimal and tell me how to verify.

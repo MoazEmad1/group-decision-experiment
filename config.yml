@@ -1,0 +1,20 @@
+# Default config, used when CONFIG_PATH is not set.
+# Same as configs/1_human_2_ai.yml so one person can run the full flow alone.
+# To switch condition, set CONFIG_PATH (e.g. CONFIG_PATH=configs/3_humans.yml)
+# instead of editing this file. tests/test_config.py checks the two stay identical.
+condition: 1_human_2_ai
+
+participants:
+  - type: human
+  - type: ai
+  - type: ai
+
+timing:
+  chat_seconds: 60
+  vote_seconds: 15
+
+ai:
+  mode: rule_based          # rule_based | llm (llm needs ANTHROPIC_API_KEY)
+  llm_model: claude-haiku-5-5
+  reply_delay_min_seconds: 2
+  reply_delay_max_seconds: 6

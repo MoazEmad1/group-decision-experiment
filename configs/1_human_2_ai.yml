@@ -1,0 +1,17 @@
+# Condition 3: 1 human + 2 AI agents.
+condition: 1_human_2_ai
+
+participants:
+  - type: human
+  - type: ai
+  - type: ai
+
+timing:
+  chat_seconds: 60
+  vote_seconds: 15
+
+ai:
+  mode: rule_based          # rule_based | llm (llm needs ANTHROPIC_API_KEY)
+  llm_model: claude-haiku-5-5
+  reply_delay_min_seconds: 2
+  reply_delay_max_seconds: 6
