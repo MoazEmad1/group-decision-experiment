@@ -4,9 +4,12 @@
    502 for a few seconds because the backend wasn't ready yet. Found by testing
    the way a reviewer would. Fix: backend healthcheck on /api/health, and the
    frontend waits until the backend is healthy. 
-2. **502 after switching condition.** nginx cached the backend’s IP at startup 
+2. **502 after switching condition.** nginx cached the backend’s IP at startup; 
    recreating the backend gave it a new IP. Fix: nginx re-resolves the backend
    through Docker’s DNS every 5 seconds.
+3. **Stale sessions confused manual tests.** Waiting sessions left over from
+   earlier runs made two test clients land in different sessions. Lesson: start
+   every manual check with `docker compose down -v`.
 
 # Design decisions
 

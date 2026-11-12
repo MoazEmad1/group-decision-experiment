@@ -1,5 +1,5 @@
 # AI usage log
-Tool: Claude Code (version: 2.1.142)
+Tool: Claude Code (version: 2.1.322)
 Model: Claude Opus 5.5
 All prompts are listed in order with date and time.
 Full session transcripts are exported into this folder with /export.
@@ -123,6 +123,7 @@ slot assignment, per-session label shuffle, AI participants created when the
 session is created, and a global lock so a 4th human starts a new session.
 When done, tell me how to verify it, and stop.
 
+
 ## Prompt 7 — 2026-11-12, 15:43
 Step 4 verified and committed, including the nginx DNS fix. Yes to the
 waiting-room fix: AIs should "join" after a random 3–10s delay so the waiting
@@ -132,3 +133,15 @@ whichever fits better.
 Proceed with step 5 only: WebSocket endpoint with token auth, state_snapshot
 on connect and reconnect, and chat broadcast and storage. When done, tell me
 how to verify it, and stop.
+
+
+## Prompt 7 — 2026-11-12, 15:59
+
+Step 5 verified and committed. Proceed with step 6 only: phase timers with
+the generation counter, voting with append-only storage and early end when
+all 3 have voted, round-1 tally at the start of round 2, results with the
+tie-break method, and the random 3–10s AI join delay in the waiting room.
+Add tests for phase advancement with tiny durations and for early vote end.
+Also silence the third-party anyio BlockingPortal DeprecationWarning from
+starlette's TestClient via filterwarnings in pytest.ini, scoped to that message.
+When done, tell me how to verify it, and stop.
