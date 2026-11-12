@@ -28,7 +28,9 @@ class JoinResult:
     token: str
     label: str
     session_id: uuid.UUID
-    session_full: bool  # every human slot filled: the session can start (wired up in step 6)
+    # Every human slot is filled. The session starts once the AIs have "joined" too
+    # (delayed, see SessionManager.on_join).
+    humans_full: bool
 
 
 class Lobby:
@@ -61,7 +63,7 @@ class Lobby:
                 token=slot.token,
                 label=slot.label,
                 session_id=slot.session_id,
-                session_full=free_left == 0,
+                humans_full=free_left == 0,
             )
 
     async def _next_free_human_slot(self, db: AsyncSession) -> Participant | None:
@@ -93,14 +95,13 @@ class Lobby:
         )
         db.add(session)
         for slot_index, (participant, label) in enumerate(zip(self.config.participants, labels)):
-            is_ai = participant.type == "ai"
+            # joined_at stays None for everyone: humans set it on join, AIs after their join delay.
             db.add(
                 Participant(
                     session_id=session.id,
                     slot_index=slot_index,
                     kind=participant.type,
                     label=label,
-                    joined_at=now if is_ai else None,
                     created_at=now,
                 )
             )

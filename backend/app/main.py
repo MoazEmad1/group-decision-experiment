@@ -73,6 +73,7 @@ def create_app(config: ExperimentConfig | None = None, engine: AsyncEngine | Non
         app.state.lobby = Lobby(cfg)
         app.state.manager = SessionManager(cfg, sessionmaker)
         yield
+        await app.state.manager.close()
         await eng.dispose()
 
     app = FastAPI(title="Group Decision Experiment", lifespan=lifespan)

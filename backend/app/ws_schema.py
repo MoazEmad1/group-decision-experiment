@@ -10,6 +10,8 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, TypeAdapter
 
+from app.logic import RoundTally
+
 MAX_MESSAGE_CHARS = 300
 
 
@@ -73,6 +75,32 @@ def phase_changed(phase: str, round: int | None, deadline: datetime | None, serv
     )
 
 
+def tally_payload(tally: RoundTally) -> dict:
+    """Counts only (who voted for whom is never sent)."""
+    return {"round": tally.round, "counts": dict(tally.counts), "abstentions": tally.abstentions}
+
+
+def tallies_payload(tallies: dict[int, RoundTally]) -> dict[str, dict]:
+    return {str(r): tally_payload(t) for r, t in sorted(tallies.items())}
+
+
+def vote_tally(tally: RoundTally) -> dict:
+    return _frame("vote_tally", tally_payload(tally))
+
+
+def vote_recorded(round: int, target: str) -> dict:
+    """Sent only to the voter, so their UI can show the current choice."""
+    return _frame("vote_recorded", {"round": round, "target": target})
+
+
+def results_payload(decision_maker: str, method: str, tallies: dict[int, RoundTally]) -> dict:
+    return {"decision_maker": decision_maker, "method": method, "tallies": tallies_payload(tallies)}
+
+
+def results(payload: dict) -> dict:
+    return _frame("results", payload)
+
+
 def state_snapshot(
     *,
     you: str,
@@ -83,7 +111,8 @@ def state_snapshot(
     server_time: datetime,
     messages: list[dict],
     my_vote: str | None,
-    tallies: dict,
+    tallies: dict[int, RoundTally],
+    results: dict | None,
 ) -> dict:
     return _frame(
         "state_snapshot",
@@ -96,7 +125,8 @@ def state_snapshot(
             "server_time": _iso(server_time),
             "messages": messages,
             "my_vote": my_vote,
-            "tallies": tallies,
+            "tallies": tallies_payload(tallies),  # completed rounds only
+            "results": results,  # None until RESULTS
         },
     )
 

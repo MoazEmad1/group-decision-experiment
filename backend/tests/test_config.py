@@ -93,6 +93,7 @@ def test_defaults_applied_when_sections_omitted(tmp_path):
     assert config.timing.vote_seconds == 15
     assert config.ai.mode == "rule_based"
     assert config.ai.reply_delay_min_seconds <= config.ai.reply_delay_max_seconds
+    assert (config.ai.join_delay_min_seconds, config.ai.join_delay_max_seconds) == (3, 10)
 
 
 def test_snapshot_round_trips():
@@ -122,6 +123,11 @@ def test_snapshot_round_trips():
             VALID_YAML + "ai:\n  reply_delay_min_seconds: 8\n  reply_delay_max_seconds: 3\n",
             "reply_delay_min_seconds must be <=",
         ),
+        (
+            VALID_YAML + "ai:\n  join_delay_min_seconds: 10\n  join_delay_max_seconds: 3\n",
+            "join_delay_min_seconds must be <=",
+        ),
+        (VALID_YAML + "ai:\n  join_delay_min_seconds: -1\n", "join_delay_min_seconds"),
         (VALID_YAML + "timming:\n  chat_seconds: 30\n", "timming"),  # typo in key is rejected
         (VALID_YAML + "timing:\n  chat_secnds: 30\n", "chat_secnds"),
         ("participants:\n  - type: human\n  - type: ai\n  - type: ai\n", "condition"),

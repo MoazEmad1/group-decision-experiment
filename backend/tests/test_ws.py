@@ -2,7 +2,6 @@
 Full app via TestClient on a temp SQLite DB."""
 
 import json
-import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,9 +13,11 @@ from app.main import create_app
 from app.models import Message, Participant
 from app.session_manager import CLOSE_INVALID_TOKEN, CLOSE_REPLACED
 from app.ws_schema import MAX_MESSAGE_CHARS
-from tests.helpers import preset
+from tests.helpers import NO_AI_JOIN_DELAY, preset
 
-SNAPSHOT_KEYS = {"you", "players", "phase", "round", "deadline", "server_time", "messages", "my_vote", "tallies"}
+SNAPSHOT_KEYS = {
+    "you", "players", "phase", "round", "deadline", "server_time", "messages", "my_vote", "tallies", "results",
+}
 
 
 @pytest.fixture
@@ -25,7 +26,8 @@ def make_client(tmp_path):
 
     def _make(preset_name: str) -> TestClient:
         engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path / f'{len(clients)}.db'}")
-        client = TestClient(create_app(config=preset(preset_name), engine=engine))
+        # AIs join instantly here so sessions start deterministically; the delay is tested in test_phases.
+        client = TestClient(create_app(config=preset(preset_name, ai=NO_AI_JOIN_DELAY), engine=engine))
         client.__enter__()  # runs the lifespan (init_db, lobby, manager)
         clients.append(client)
         return client

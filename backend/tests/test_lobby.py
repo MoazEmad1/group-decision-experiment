@@ -37,16 +37,16 @@ async def participants_of(sessionmaker, session_id):
         return rows.all()
 
 
-async def test_1_human_2_ai_session_created_full_with_ai_rows(sessionmaker):
+async def test_1_human_2_ai_session_created_with_ai_rows_not_yet_joined(sessionmaker):
     result = await join(Lobby(preset("1_human_2_ai")), sessionmaker)
-    assert result.session_full
+    assert result.humans_full
     assert result.label in LABELS
 
     rows = await participants_of(sessionmaker, result.session_id)
     assert [r.kind for r in rows] == ["human", "ai", "ai"]
     assert sorted(r.label for r in rows) == list(LABELS)
     assert all(r.token is None for r in rows if r.kind == "ai")
-    assert all(r.joined_at is not None for r in rows)  # AI "joined" at creation
+    assert all((r.joined_at is not None) == (r.kind == "human") for r in rows)  # AIs join later, after their delay
 
 
 async def test_3_humans_fill_one_session_then_4th_starts_new(sessionmaker):
@@ -56,18 +56,18 @@ async def test_3_humans_fill_one_session_then_4th_starts_new(sessionmaker):
     first_three = results[:3]
     assert len({r.session_id for r in first_three}) == 1
     assert sorted(r.label for r in first_three) == list(LABELS)
-    assert [r.session_full for r in first_three] == [False, False, True]
+    assert [r.humans_full for r in first_three] == [False, False, True]
 
     fourth = results[3]
     assert fourth.session_id != first_three[0].session_id
-    assert not fourth.session_full
+    assert not fourth.humans_full
 
 
 async def test_2_humans_1_ai_two_joins_fill_session(sessionmaker):
     lobby = Lobby(preset("2_humans_1_ai"))
     a, b = await join(lobby, sessionmaker), await join(lobby, sessionmaker)
     assert a.session_id == b.session_id
-    assert (a.session_full, b.session_full) == (False, True)
+    assert (a.humans_full, b.humans_full) == (False, True)
     assert a.label != b.label
 
 

@@ -10,6 +10,10 @@
 3. **Stale sessions confused manual tests.** Waiting sessions left over from
    earlier runs made two test clients land in different sessions. Lesson: start
    every manual check with `docker compose down -v`.
+4. **Unawaited coroutine on timer cancel.** Cancelling a phase timer that
+   hadn't started yet left a coroutine that was never awaited (RuntimeWarning).
+   Fix: the coroutine is now created inside the task; tests run with
+   RuntimeWarnings turned into errors.
 
 # Design decisions
 
@@ -20,4 +24,7 @@
    result is reproducible).
 2. **AI join delay.** AIs ‘join’ the waiting room after a random 3–10 seconds, 
    so the waiting room behaves the same in every condition and doesn’t reveal 
-   AI participants.
+   AI participants. 
+3. **Stale timers.** Each phase change increments a generation counter and
+   cancels the previous timer; a timer that fires late for an old generation
+   does nothing, so a session can never advance twice.

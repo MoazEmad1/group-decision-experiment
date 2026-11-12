@@ -61,7 +61,7 @@ class Participant(Base):
     kind: Mapped[str] = mapped_column(String(8))  # "human" | "ai". Never sent to clients.
     label: Mapped[str] = mapped_column(String(1))  # "A" | "B" | "C", shuffled per session
     token: Mapped[str | None] = mapped_column(String(64), unique=True)  # humans only, set on join
-    joined_at: Mapped[datetime | None] = mapped_column(Timestamp)  # humans: join time; AI: creation
+    joined_at: Mapped[datetime | None] = mapped_column(Timestamp)  # humans: POST /join; AI: after join delay
     created_at: Mapped[datetime] = mapped_column(Timestamp, default=utcnow)
 
     session: Mapped[ExperimentSession] = relationship(back_populates="participants", foreign_keys=[session_id])

@@ -37,11 +37,17 @@ class AIConfig(_Strict):
     llm_model: str = Field(default="claude-haiku-5-5", min_length=1)
     reply_delay_min_seconds: float = Field(default=2, ge=0)
     reply_delay_max_seconds: float = Field(default=6, ge=0)
+    # Each AI "joins" the waiting room after a random delay in this range, so a lone human
+    # waits like they would for other humans (blind condition). 0/0 = join instantly.
+    join_delay_min_seconds: float = Field(default=3, ge=0)
+    join_delay_max_seconds: float = Field(default=10, ge=0)
 
     @model_validator(mode="after")
-    def _delay_range(self):
+    def _delay_ranges(self):
         if self.reply_delay_min_seconds > self.reply_delay_max_seconds:
             raise ValueError("reply_delay_min_seconds must be <= reply_delay_max_seconds")
+        if self.join_delay_min_seconds > self.join_delay_max_seconds:
+            raise ValueError("join_delay_min_seconds must be <= join_delay_max_seconds")
         return self
 
 

@@ -15,3 +15,5 @@ ai:
   llm_model: claude-haiku-5-5
   reply_delay_min_seconds: 2
   reply_delay_max_seconds: 6
+  join_delay_min_seconds: 3
+  join_delay_max_seconds: 10
